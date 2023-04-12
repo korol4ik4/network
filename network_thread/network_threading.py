@@ -79,6 +79,10 @@ class NetwokThread:
                 #print(e, 'server BaseException')
                 fail += 1
                 continue
+        if connect.sock:
+            connect.sock.close()
+        else:
+            connect.close()
 
 
     def incoming(self,service_message,data, connect):
