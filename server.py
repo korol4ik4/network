@@ -2,12 +2,13 @@
 from network_thread.network_threading import NetwokThread
 import socket
 
+
 class Server(NetwokThread):
     def __init__(self, port, address ='',timeout = 120,keys_path='keys', keys_name='server_rsa'):
         super(Server,self).__init__(timeout = timeout,keys_path=keys_path, keys_name=keys_name)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((address, port))
-        self.sock.listen(1000)
+        self.sock.listen(10)
         self.listen()
 
     def close(self):
@@ -29,6 +30,7 @@ class Server(NetwokThread):
             pass
         ########################
         self.sock.close()
+        self.control.clean()
 
     def incoming(self, service_message, data, connect):
         print(service_message, data, connect)
@@ -36,6 +38,7 @@ class Server(NetwokThread):
 
     #  @staticmethod
     def send_data(self,connect, data, **kwargs):
-
-        connect.__send__(data, **kwargs)
+        stat = connect.__send__(data, **kwargs)
+        if not stat:
+            self.control.clean()
 
