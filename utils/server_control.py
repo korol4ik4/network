@@ -52,6 +52,37 @@ class ServerControl:
             line.append(pub_key)
         return line
 
+    def del_line(self, index):
+        if index > len(self.connect):
+            return
+        # удаление из списка
+        self.connect.pop(index)
+        self.thread.pop(index)
+        self.session_key.pop(index)
+        # удаление из промежуточной "таблицы"
+
+        pub_key_index = self.sess_pub.pop(index)  # id:kid
+        #print(index, pub_key_index, self.sess_pub)  # id:kid
+        # удаляем публичный ключ если это последняя запись ссылающиеся на него
+        if pub_key_index not in self.sess_pub.values():
+            self.public_key.pop(pub_key_index)
+            # нужно поправить self.sess_pub, так как все индексы  public_key выше pub_key_index сместились на -1
+            # сначала values()
+            for sid in self.sess_pub.keys():
+                if self.sess_pub[sid] > pub_key_index:
+                    self.sess_pub[sid] -= 1
+        # а теперь ключи
+        new_sess_pub = {}
+        for sid, pid in self.sess_pub.items():
+            if sid > index:
+                sid -= 1
+            new_sess_pub.update({sid:pid})
+        self.sess_pub = new_sess_pub
+
+
+
+
+
     def get(self, **kwargs):
 
         if not kwargs:
@@ -93,3 +124,22 @@ class ServerControl:
                 if pid == pub_id:
                     rows.append(self.get_line(id))
             return rows
+
+    def close_id(self,id):
+        if id >= len(self.connect):
+            return
+        try:
+            self.thread[id].join(1)
+            self.connect[id].close()
+        except:
+            pass
+        self.del_line(id)
+
+    def clean(self):
+        for id,connect in enumerate(self.connect):
+            if connect.sock:
+                if connect.sock.fileno()<0:
+                    self.close_id(id)
+            else:
+                self.close_id(id)
+
