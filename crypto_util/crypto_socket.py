@@ -32,7 +32,9 @@ class CryptoSocket(socket):
         else:
             self.sock=None
             super(CryptoSocket, self).__init__(*args, **kwargs)
+
         self.session = False
+        self._on_send = False
 
     def __accept__(self):
         connected_socket, address = self.accept()
@@ -83,9 +85,15 @@ class CryptoSocket(socket):
             service_message(size=len(enc_data))
             service_message = service_message.json()
             enc_serv_msg = self.coder.encrypt(service_message.encode())
+            #--- socket send from threads block
+            while self._on_send:
+                sleep(0.01) # wait for end blocking
+            self._on_send = True # block send for other
+            ## send
             connect.sendall(enc_serv_msg,buffer_size)
             sleep(0.01)# иначе сольются данные, пока так
             connect.sendall(enc_data,buffer_size)
+            self._on_send = False # end blocking
             return True
         except BaseException as e:
             print("can't __send__", e)
