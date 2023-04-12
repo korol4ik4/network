@@ -86,9 +86,12 @@ class CryptoSocket(socket):
             connect.sendall(enc_serv_msg,buffer_size)
             sleep(0.01)# иначе сольются данные, пока так
             connect.sendall(enc_data,buffer_size)
+            return True
         except BaseException as e:
-            print(e)
-            raise Exception("fail to send")
+            print("can't __send__", e)
+            return False
+
+            #raise Exception("fail to send")
 
 
     @staticmethod
