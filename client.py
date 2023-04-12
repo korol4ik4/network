@@ -1,7 +1,7 @@
 
 from network_thread.network_threading import NetwokThread
 from threading import Thread
-from time import sleep
+
 
 class Client(NetwokThread):
     def __init__(self,port,address="127.0.0.1",timeout = 25,keys_path='keys', keys_name='client_rsa'):
@@ -27,13 +27,5 @@ class Client(NetwokThread):
         self.sock.close()
 
     def send_data(self,data,**kwargs):
-        try:
-            self.sock.__send__(data, **kwargs)
-        except BaseException as e:
-            print(e)
-            self.close()
-            address,port = self.address,self.port
-            self.__init__(port,address)
-            self.send_data(data, **kwargs)
-            #raise ConnectionError()
+        self.sock.__send__(data, **kwargs)
 
