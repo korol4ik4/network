@@ -26,18 +26,10 @@ class NetwokThread:
             return  # Exit
         try:
             accept = self.sock.__accept__()
-            #print(f'connected to {accept[1]}')
             connect, address = accept
-
             connect.sock.settimeout(self.session_timeout)
-
-            thr_session = Thread(target=connect.__session__,name=f'connected_to {address}')
-            thr_session.start()
-            #print('connected ', address)
-            tm = time()
-            while time() - tm < 5:
-                if connect.session:
-                    break
+            if not connect.__session__(server_session= True):
+                raise Exception("fail to create session")
             if connect.session:
                 thr_recv = self.recv_loop_thread(connect)
                 self.control.append_connect_thread(connect,thr_recv)
@@ -48,13 +40,6 @@ class NetwokThread:
             print('ошибка :D', e)
         finally:
             self._accept()
-
-    def _session(self, connect,server_session = True):
-        if connect:
-            connect.__session__(server_session= server_session)
-
-
-        pass
 
     def _connect(self,address,port):  # client
         self.sock.connect((address,port))
