@@ -10,10 +10,10 @@ class Client(NetwokThread):
         self.create_session()
 
     def create_session(self):
-        self.connect(self.address, self.port)
+        self.connect_thread(self.address, self.port)
         #print('client connected',self.address)
-        if self.sock.__session__(serv=False):
-            self.recv_loop(self.sock)
+        if self.sock.__session__(server_session=False):
+            self.recv_loop_thread(self.sock)
             return True
         else:
             return False
