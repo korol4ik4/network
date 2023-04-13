@@ -144,17 +144,17 @@ class CryptoSocket(socket):
             return None, None
         return public_key, private_key
 
-    def __session__(self,serv = True):
+    def __session__(self, server_session = True):
         connect = self if not self.sock else self.sock
         try:
             data_key = self.public_key.save_pkcs1()
 
-            if serv:
+            if server_session:
                 repubkey = connect.recv(1024)  # recive remote pub key
 
             connect.sendall(data_key, 1024) # send self pub key
 
-            if not serv:
+            if not server_session:
                 repubkey = connect.recv(1024)  # recive remote pub key
 
             if not repubkey:
@@ -163,13 +163,13 @@ class CryptoSocket(socket):
             key_encryptor = self.coder.generate_key()  # генерация ключа aes128
             enc_key_enc = rsa.encrypt(key_encryptor, remote_pubkey)  # шифруем аес ключ принятым публичным ключом
 
-            if not serv:
+            if not server_session:
                 connect.sendall(enc_key_enc, 1024)  # send my key for encryptor
 
             enc_key_dec = connect.recv(1024)  # принимаем aes ключ для дешифровки входящих сообщений
             key_decryptor = rsa.decrypt(enc_key_dec, self.private_key)  # расшифровываем его
 
-            if serv:
+            if server_session:
                 connect.sendall(enc_key_enc, 1024)  # send my key for encryptor
 
             self.set_key(enc_key=key_encryptor, dec_key=key_decryptor)  # и загругаем оба аес ключа в наш кодер
