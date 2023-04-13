@@ -1,6 +1,5 @@
 
 from network_thread.network_threading import NetwokThread
-from threading import Thread
 
 
 class Client(NetwokThread):
@@ -13,11 +12,14 @@ class Client(NetwokThread):
     def create_session(self):
         self.connect(self.address, self.port)
         #print('client connected',self.address)
-        self.sock.__session__(serv=False)
+        if self.sock.__session__(serv=False):
+            self.recv_loop(self.sock)
+            return True
+        else:
+            return False
         #print('client session created ',self.sock.session)
-        thr_recv = Thread(target=self._recv_loop, args=(self.sock,), name=f'receive loop {self.address}')
-        thr_recv.start()
-        return True
+
+
     def incoming(self, service_message, data, connect):
         print(service_message, data, connect)
         #connect.__send__('Hello'.encode(), data_type='text')
