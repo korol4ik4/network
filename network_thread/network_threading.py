@@ -37,7 +37,7 @@ class NetwokThread:
                 if connect.session:
                     break
             if connect.session:
-                thr_recv = self.recv_loop(connect)
+                thr_recv = self.recv_loop_thread(connect)
                 self.control.append_connect_thread(connect,thr_recv)
                 self.control.update_keys(connect,connect.coder.get,connect.session)
             else:
@@ -47,7 +47,11 @@ class NetwokThread:
         finally:
             self._listen()
 
-    def _session(self):
+    def _session(self, connect,server_session = True):
+        if connect:
+            connect.__session__(server_session= server_session)
+
+
         pass
 
     def _connect(self,address,port):  # client
@@ -56,7 +60,7 @@ class NetwokThread:
         self.client_connected = True
         self.is_run = True
 
-    def connect(self,address,port):
+    def connect_thread(self, address, port):
         cnct_thr = Thread(target=self._connect, args=(address,port))
         cnct_thr.start()
         tm = time()
@@ -67,7 +71,7 @@ class NetwokThread:
             raise ConnectionError('client is not connected')
         return cnct_thr
 
-    def recv_loop(self, connect, buffer_size=4096):
+    def recv_loop_thread(self, connect, buffer_size=4096):
         if connect.session:
             thr_recv = Thread(target=self._recv_loop, args=(connect,buffer_size), name=f'receive loop {connect}')
             thr_recv.start()
