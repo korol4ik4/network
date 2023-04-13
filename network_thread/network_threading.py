@@ -14,10 +14,10 @@ class NetwokThread:
         self.control = ServerControl()
         self.client_connected=False
 
-
     def listen(self):
         lst_thr = Thread(target=self._listen, name=f'wait accept')
         lst_thr.start()
+        return lst_thr
 
     def _listen(self):
         if not self.is_run:
@@ -37,8 +37,7 @@ class NetwokThread:
                 if connect.session:
                     break
             if connect.session:
-                thr_recv = Thread(target=self._recv_loop, args=(connect,), name=f'receive loop {address}')
-                thr_recv.start()
+                thr_recv = self.recv_loop(connect)
                 self.control.append_connect_thread(connect,thr_recv)
                 self.control.update_keys(connect,connect.coder.get,connect.session)
             else:
@@ -47,6 +46,9 @@ class NetwokThread:
             print('ошибка :D', e)
         finally:
             self._listen()
+
+    def _session(self):
+        pass
 
     def _connect(self,address,port):  # client
         self.sock.connect((address,port))
@@ -63,17 +65,25 @@ class NetwokThread:
         if not self.client_connected:
             self.sock.close()
             raise ConnectionError('client is not connected')
+        return cnct_thr
 
+    def recv_loop(self, connect, buffer_size=4096):
+        if connect.session:
+            thr_recv = Thread(target=self._recv_loop, args=(connect,buffer_size), name=f'receive loop {connect}')
+            thr_recv.start()
+            return thr_recv
 
     def _recv_loop(self, connect, buffer_size=4096):
         fail=0
         while self.is_run and fail < 10:
             try:
                 service_message, data = connect.__recv_data__(buffer_size)
+                #  тут проверка на stream
+                # и начало stream
                 self.incoming(service_message, data, connect)
                 fail=0
             except ConnectionError as e:
-                print(e, 'connect server error')
+                print(e, 'connect error')
                 break
             except BaseException as e:
                 #print(e, 'server BaseException')
