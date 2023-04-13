@@ -14,12 +14,14 @@ class NetwokThread:
         self.control = ServerControl()
         self.client_connected=False
 
-    def listen(self):
-        lst_thr = Thread(target=self._listen, name=f'wait accept')
+    def accept(self, address, port):
+        self.sock.bind((address, port))
+        self.sock.listen(10)
+        lst_thr = Thread(target=self._accept, name=f'wait accept')
         lst_thr.start()
         return lst_thr
 
-    def _listen(self):
+    def _accept(self):
         if not self.is_run:
             return  # Exit
         try:
@@ -45,7 +47,7 @@ class NetwokThread:
         except BaseException as e:
             print('ошибка :D', e)
         finally:
-            self._listen()
+            self._accept()
 
     def _session(self, connect,server_session = True):
         if connect:
