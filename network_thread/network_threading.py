@@ -29,7 +29,7 @@ class NetwokThread:
             connect, address = accept
             connect.sock.settimeout(self.session_timeout)
             if not connect.__session__(server_session= True):
-                raise Exception("fail to create session")
+                raise Exception("fail to access or create session")
             if connect.session:
                 thr_recv = self.recv_loop_thread(connect)
                 self.control.append_connect_thread(connect,thr_recv)
@@ -37,7 +37,7 @@ class NetwokThread:
             else:
                 connect.sock.close()
         except BaseException as e:
-            print('ошибка :D', e)
+            print('ошибка :D или выход сервера', e)
         finally:
             self._accept()
 
