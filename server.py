@@ -7,7 +7,7 @@ class Server(NetwokThread):
     def __init__(self, port, address ='',timeout = 120,keys_path='keys', keys_name='server_rsa'):
         super(Server,self).__init__(timeout = timeout,keys_path=keys_path, keys_name=keys_name)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.accept(address, port)
+        self.accept_thread(address, port)
 
     def close(self):
         self.is_run = False

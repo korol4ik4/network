@@ -14,7 +14,7 @@ class NetwokThread:
         self.control = ServerControl()
         self.client_connected=False
 
-    def accept(self, address, port):
+    def accept_thread(self, address, port):
         self.sock.bind((address, port))
         self.sock.listen(10)
         lst_thr = Thread(target=self._accept, name=f'wait accept')
